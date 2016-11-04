@@ -198,9 +198,10 @@ class ProviderClient {
     }
 
     private HttpRequest newRequest(Request request) {
-        String scheme = provider.protocol
-        String host = invokeIfClosure(provider.host)
-        int port = convertToInteger(invokeIfClosure(provider.port))
+        def urlBuilder = new URIBuilder()
+        urlBuilder.scheme = provider.protocol
+        urlBuilder.host = invokeIfClosure(provider.host)
+        urlBuilder.port = convertToInteger(invokeIfClosure(provider.port))
 
         String path = ''
         if (provider.path.size() > 0) {
@@ -210,12 +211,8 @@ class ProviderClient {
             }
         }
 
-        if(Boolean.getBoolean("disable.url.path.decoding"))
-            path += request.path
-        else
-            path += URLDecoder.decode(request.path, UTF8)
-
-        def urlBuilder = new URIBuilder(scheme+"://"+host+":"+port+path)
+        path += URLDecoder.decode(request.path, UTF8)
+        urlBuilder.path = path
 
         if (request.query != null && !urlEncodedFormPost(request)) {
           request.query.each {
